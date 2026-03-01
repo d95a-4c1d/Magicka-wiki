@@ -41,11 +41,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://d95a-4c1d.github.io/Magicka-wiki/%E6%B3%95%E9%98%B5/</loc>
-         <lastmod>2026-03-01</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://d95a-4c1d.github.io/Magicka-wiki/%E7%82%BC%E9%87%91/</loc>
          <lastmod>2026-03-01</lastmod>
          <changefreq>daily</changefreq>
@@ -107,6 +102,11 @@
     </url>
     <url>
          <loc>https://d95a-4c1d.github.io/Magicka-wiki/%E6%B3%95%E9%98%B5/%E5%A4%8D%E6%B4%BB%E6%B3%95%E9%98%B5/</loc>
+         <lastmod>2026-03-01</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://d95a-4c1d.github.io/Magicka-wiki/%E6%B3%95%E9%98%B5/%E6%B3%95%E9%98%B5%E7%AE%80%E4%BB%8B/</loc>
          <lastmod>2026-03-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
