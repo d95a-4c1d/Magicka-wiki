@@ -14,4 +14,4 @@ docker stop [对应名称]
 使用
 ```bash
 docker run --rm -it -p 80:80 -v ${PWD}:/docs --user $(id -u):$(id -g) squidfunk/mkdocs-material serve --dev-addr=0.0.0.0:80
-```# Magicka-wiki
+```
