@@ -1,0 +1,36 @@
+site_name: Magicka Wiki
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.integrate
+    - toc.follow
+nav:
+  - 简介: index.md
+  - 剧情.md
+  - 魔法:
+    - 法阵.md
+    - 烹饪.md
+    - 炼金.md
+    - 符咒.md
+    - 祷文.md
+  - 物品:
+    - 粉末.md
+    - 物品特性.md
+    - 材料特性.md
+  - 敌人:
+    - 类型.md
+    - 机制.md
+    - 寻路.md
+  - 载具:
+    - 载具生成.md
+    - 载具机制.md
+  - 玩家:
+    - 运动.md
+    - 背包.md
+    - 操作.md
+  - 地图:
+    - 地图搭建.md
+    - 地图生成.md
+    
