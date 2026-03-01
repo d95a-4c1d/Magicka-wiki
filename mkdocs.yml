@@ -1,4 +1,6 @@
 site_name: Magicka Wiki
+site_url: https://d95a-4c1d.github.io/Magicka-wiki/
+repo_url: https://github.com/d95a-4c1d/Magicka-wiki
 theme:
   name: material
   features:
@@ -8,29 +10,32 @@ theme:
     - toc.follow
 nav:
   - 简介: index.md
-  - 剧情.md
+  - 剧情: 剧情.md
   - 魔法:
-    - 法阵.md
-    - 烹饪.md
-    - 炼金.md
-    - 符咒.md
-    - 祷文.md
+    - 法阵:
+      - 法阵简介: 法阵/法阵简介.md
+      - 复制法阵: 法阵/复制法阵.md
+      - 复活法阵: 法阵/复活法阵.md
+    - 烹饪: 烹饪.md
+    - 炼金: 炼金.md
+    - 符咒: 符咒.md
+    - 祷文: 祷文.md
   - 物品:
-    - 粉末.md
-    - 物品特性.md
-    - 材料特性.md
+    - 粉末: 粉末.md
+    - 物品特性: 物品特性.md
+    - 材料特性: 材料特性.md
   - 敌人:
-    - 类型.md
-    - 机制.md
-    - 寻路.md
+    - 类型: 类型.md
+    - 机制: 机制.md
+    - 寻路: 寻路.md
   - 载具:
-    - 载具生成.md
-    - 载具机制.md
+    - 载具生成: 载具生成.md
+    - 载具机制: 载具机制.md
   - 玩家:
-    - 运动.md
-    - 背包.md
-    - 操作.md
+    - 运动: 运动.md
+    - 背包: 背包.md
+    - 操作: 操作.md
   - 地图:
-    - 地图搭建.md
-    - 地图生成.md
+    - 地图搭建: 地图搭建.md
+    - 地图生成: 地图生成.md
     
