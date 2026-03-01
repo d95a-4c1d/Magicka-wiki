@@ -1,6 +1,7 @@
 site_name: Magicka Wiki
 site_url: https://d95a-4c1d.github.io/Magicka-wiki/
 repo_url: https://github.com/d95a-4c1d/Magicka-wiki
+edit_uri: edit/main/docs/
 theme:
   name: material
   features:
@@ -8,6 +9,7 @@ theme:
     - navigation.tabs.sticky
     - toc.integrate
     - toc.follow
+    - content.action.edit
 nav:
   - 简介: index.md
   - 剧情: 剧情.md
