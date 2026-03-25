@@ -1930,11 +1930,82 @@
 甚至后续的一系列机制甚至能为给物体添加新的特性(如祷文)
 所以我们需要一个强有力的系统去维护“性质”
 Unity本身的脚本组件系统就是一个很好的引子</p>
-<p>对于物品，其统一需要挂载一个 <code>Items.cs</code> 脚本
-我们新建一个名为 <code>Feature</code>的<code>MonoBehaviour</code>继承类，其本身可以像正常脚本一样直接添加
-<code>Feature</code> 内部用于定义函数接口，如当物体着火时，会调用 <code>OnFire()</code> 函数，但为空定义
-比如我们希望添加“可燃性”的性质，那就新建一个 <code>Flammability</code> 类，继承自 <code>Feature</code>，然后在类内用 <code>override</code> 重写 <code>OnFire()</code> 函数即可，<code>Items.cs</code> 会自动调用 <code>OnFire()</code> 函数</p>
-<p>注意：请勿，随意更改 <code>Items.cs</code> 内的内容，如要修改，请上报沟通</p>
+<h1 id="feature">Feature 的使用方式</h1>
+<p>对于物品，其统一需要挂载一个 <code>Items.cs</code> 脚本</p>
+<p>我们新建一个名为 <code>Feature</code> 的 <code>MonoBehaviour</code> 继承类，其本身可以像正常脚本一样直接添加到物体上<br />
+所有具体的物品特性，都应当继承自 <code>Feature</code></p>
+<p>与传统的“在 <code>Items.cs</code> 中遍历所有特性并调用接口”不同，当前结构采用的是“注册制”<br />
+也就是说，<code>Items.cs</code> 内部会维护若干个函数调用列表，而 <code>Feature</code> 则负责在启用时将自己需要执行的函数注册进去</p>
+<p>目前，<code>Items.cs</code> 主要维护两个列表：</p>
+<ul>
+<li><code>Start</code> 队列：物品初始化时调用一次</li>
+<li><code>Update</code> 队列：物品每帧调用一次</li>
+</ul>
+<h2 id="_2">注册方式</h2>
+<p><code>Feature</code> 脚本中可以通过如下函数，将自己的逻辑注册到 <code>Items.cs</code> 中：</p>
+<ul>
+<li><code>RegisterStartFeature(SomeMethod, rank)</code></li>
+<li><code>RegisterUpdateFeature(SomeMethod, rank)</code></li>
+</ul>
+<p>其中，<code>rank</code> 用于控制调用顺序，数值越小，越优先执行</p>
+<p>例如：</p>
+<div class="highlight"><pre><span></span><code><span class="k">using</span><span class="w"> </span><span class="nn">UnityEngine</span><span class="p">;</span>
+
+<span class="c1">// Author: YourName</span>
+<span class="k">public</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Flammability</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Feature</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">startRank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">updateRank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">isBurning</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">RegisterFeatureHooks</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">RegisterStartFeature</span><span class="p">(</span><span class="n">OnItemStart</span><span class="p">,</span><span class="w"> </span><span class="n">startRank</span><span class="p">);</span>
+<span class="w">        </span><span class="n">RegisterUpdateFeature</span><span class="p">(</span><span class="n">OnItemUpdate</span><span class="p">,</span><span class="w"> </span><span class="n">updateRank</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">UnregisterFeatureHooks</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">UnregisterStartFeature</span><span class="p">(</span><span class="n">OnItemStart</span><span class="p">);</span>
+<span class="w">        </span><span class="n">UnregisterUpdateFeature</span><span class="p">(</span><span class="n">OnItemUpdate</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">OnItemStart</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="n">isBurning</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">public</span><span class="w"> </span><span class="k">override</span><span class="w"> </span><span class="k">void</span><span class="w"> </span><span class="nf">OnItemUpdate</span><span class="p">()</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isBurning</span><span class="p">)</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; is burning&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>当该脚本与 <code>Items.cs</code> 挂载在同一个物体上时，<code>Items.cs</code> 会自动成为其宿主<br />
+随后在物体启动时调用 <code>OnItemStart()</code>，并在每帧调用 <code>OnItemUpdate()</code></p>
+<h2 id="_3">使用建议</h2>
+<p>请将每一种“性质”尽量拆分为独立的 <code>Feature</code> 脚本<br />
+例如：</p>
+<ul>
+<li>可燃性：<code>Flammability</code></li>
+<li>导电性：<code>Conductivity</code></li>
+<li>腐蚀性：<code>Corrosiveness</code></li>
+</ul>
+<p>这样做的好处是：</p>
+<ul>
+<li>各性质之间相互独立，方便多人协作</li>
+<li>便于后续通过材料、法术、祷文等方式动态添加性质</li>
+<li>避免将大量逻辑堆积在 <code>Items.cs</code> 中</li>
+</ul>
+<h2 id="_4">注意事项</h2>
+<p>请勿随意更改 <code>Items.cs</code> 的整体调度结构，如需修改，请先沟通</p>
+<p>当前设计中，不再为每一种性质单独提供统一事件接口<br />
+若某种性质需要持续判断或触发效果，请直接在其注册到 <code>Update</code> 队列中的函数内自行处理</p>
+<p>也就是说，<code>Items.cs</code> 只负责“按顺序调用已注册函数”<br />
+而每个 <code>Feature</code> 自己负责“该做什么”</p>
 
 
 
