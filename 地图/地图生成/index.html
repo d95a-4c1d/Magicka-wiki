@@ -2140,15 +2140,15 @@
 <p>从大到小，我们分为：</p>
 <p><div class="highlight"><pre><span></span><code>地形-&gt;区域-&gt;建筑群-&gt;区块
 </code></pre></div>
-基本单位是正方形的区块，以 $20\times 20$ 为大小
-暂定目前的地图大小为 $128 \times 128$ 区块</p>
+基本单位是正方形的区块，以 <span class="arithmatex">\(20\times 20\)</span> 为大小
+暂定目前的地图大小为 <span class="arithmatex">\(128 \times 128\)</span> 区块</p>
 <h2 id="_2">地形</h2>
 <p>为了保证整体地形高度的平滑性，我们统一使用一个Terrain对象</p>
 <p>要生成地形，我们需要以下的控制图(默认都是0-1控制图)：</p>
 <p>平缓程度：连续控制图，用FBM去生成，越接近于1说明此处的地形越平缓
 叠加高度：一张简易的波形连续控制图，由平缓程度决定了波形的颠簸程度
 山地：连续控制图，但是有随机撒种+Domain Warp生成，形式上类似于若干的平顶峰
-最后要得到高度图，就直接拿 $\text{山地}\times \text{叠加高度} \times \text{常数}$</p>
+最后要得到高度图，就直接拿 <span class="arithmatex">\(\text{山地}\times \text{叠加高度} \times \text{常数}\)</span></p>
 <p>先暂时做这么多先</p>
 <h2 id="_3">区域</h2>
 <p>区域又由若干的控制图决定，比如高温+湿度+平原=雨林之类的
@@ -2219,6 +2219,10 @@
     
     
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
