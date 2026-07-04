@@ -1925,6 +1925,78 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#3d-tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        建筑模板与3D Tile约定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="建筑模板与3D Tile约定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        尺寸约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        资源路径约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tile与模板内容
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        编辑器约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        运行时优化约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2166,6 +2238,62 @@
 <p>注意对高度图进行一定程度上的修改，使得其不要出现太过陡峭的部分
 建筑的填充方式则使用预制的建筑模板，最后根据地形为区块设定权重，将城市间通过主干道连接即可</p>
 <p>道路的生成方式采用spline</p>
+<h2 id="3d-tile">建筑模板与3D Tile约定</h2>
+<p>建筑模板用于描述一个可以被城市生成系统摆放的建筑单元。模板本身以Object空间的原点作为二维平面左下角，默认使用本地坐标的 <span class="arithmatex">\(+X\)</span> 方向作为宽度方向，<span class="arithmatex">\(+Z\)</span> 方向作为长度方向，<span class="arithmatex">\(+Y\)</span> 方向作为高度方向。</p>
+<h3 id="_5">尺寸约定</h3>
+<p>一个区块由 <span class="arithmatex">\(8\times 8\)</span> 个tile组成，同时对应 <span class="arithmatex">\(8\times 8\)</span> 个Unity世界单位。</p>
+<p>因此，默认情况下：</p>
+<ul>
+<li>1个tile占据 <span class="arithmatex">\(1\times 1\)</span> 个Unity世界单位的平面面积</li>
+<li>1个区块占据 <span class="arithmatex">\(8\times 8\)</span> 个Unity世界单位的平面面积</li>
+<li>建筑模板的平面长宽以区块为单位记录</li>
+<li>建筑模板内部的tile位置以tile为单位记录</li>
+</ul>
+<p>建筑模板允许多层结构。模板内tile的逻辑位置使用三维整数坐标表示，例如 <span class="arithmatex">\((x,y,z)\)</span>，其中 <span class="arithmatex">\(x\)</span> 和 <span class="arithmatex">\(z\)</span> 表示平面网格位置，<span class="arithmatex">\(y\)</span> 表示高度层。</p>
+<h3 id="_6">资源路径约定</h3>
+<p>MagicaVoxel导出的源文件放置在：</p>
+<div class="highlight"><pre><span></span><code>Assets/Artset/Building/tiles
+</code></pre></div>
+<p>例如 <code>.obj</code>、<code>.mtl</code>、<code>.png</code> 等源资源应保留在该目录内。</p>
+<p>可在Unity中直接实例化的tile prefab放置在：</p>
+<div class="highlight"><pre><span></span><code>Assets/Perfab/Building/Tiles
+</code></pre></div>
+<p>可供地图生成系统摆放的建筑模板prefab放置在：</p>
+<div class="highlight"><pre><span></span><code>Assets/Perfab/Building/Templates
+</code></pre></div>
+<h3 id="tile">Tile与模板内容</h3>
+<p>建筑模板内部保存的不只是普通墙体、地板等tile，也可以保存门、机关、容器等特殊建筑部件。它们在模板编辑器中都以tile prefab的形式被放置，但可以通过脚本参数区分用途和后续行为。</p>
+<p>每个tile prefab应挂载一个用于描述tile信息的脚本。该脚本至少需要支持：</p>
+<ul>
+<li>该tile是否参与运行时mesh合并</li>
+<li>该tile是否阻挡移动或寻路</li>
+<li>该tile的碰撞盒参数</li>
+<li>后续破坏效果、交互效果、门等个性化参数</li>
+</ul>
+<p>初版中，tile的碰撞统一使用BoxCollider处理。</p>
+<h3 id="_7">编辑器约定</h3>
+<p>建筑模板应提供专用Editor编辑器，用于在Scene视图或Inspector中编辑模板内容。</p>
+<p>编辑器需要支持：</p>
+<ul>
+<li>设置模板占据的区块长宽</li>
+<li>选择当前要放置的tile prefab</li>
+<li>在三维网格中像搭方块一样放置tile</li>
+<li>删除已有tile</li>
+<li>调整tile朝向</li>
+<li>切换当前编辑高度层</li>
+<li>以Object空间原点作为左下角进行可视化</li>
+</ul>
+<p>编辑器中显示的网格应遵循“1个tile = 1个Unity世界单位”的默认比例。</p>
+<h3 id="_8">运行时优化约定</h3>
+<p>建筑模板在游戏运行时应自动执行一次初始化优化。初版目标是合并模板内可合并tile的mesh，以减少Draw Call和渲染对象数量。</p>
+<p>MagicaVoxel导出的obj通常共享同一套调色板材质，因此在材质一致且tile允许合并时，可以将多个tile的Mesh合并为一个或少数几个Mesh。</p>
+<p>需要注意：</p>
+<ul>
+<li>mesh合并只处理可合并的静态可视部分</li>
+<li>仍需要保留特殊tile的脚本参数，供后续破坏、交互或门逻辑使用</li>
+<li>初版可以先保留每个tile的BoxCollider，后续再考虑合并碰撞</li>
+<li>不应把有独立运行时行为的tile强制合并掉</li>
+</ul>
 
 
 
