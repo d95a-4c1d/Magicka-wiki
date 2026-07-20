@@ -1974,7 +1974,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        编辑器约定
+        模板数据结构
       
     </span>
   </a>
@@ -1985,7 +1985,29 @@
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
+        编辑器约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         运行时优化约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        当前实现进度
       
     </span>
   </a>
@@ -2175,6 +2197,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%8F%91/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    常见问题
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2271,7 +2321,19 @@
 <li>后续破坏效果、交互效果、门等个性化参数</li>
 </ul>
 <p>初版中，tile的碰撞统一使用BoxCollider处理。</p>
-<h3 id="_7">编辑器约定</h3>
+<h3 id="_7">模板数据结构</h3>
+<p>建筑模板内部的tile数据按mesh chunk进行分桶保存，而不是用单个全量列表维护所有tile。</p>
+<p>当前约定为：</p>
+<ul>
+<li>序列化保存层使用 <code>TileChunk -&gt; TileEntry列表</code></li>
+<li>每个 <code>TileChunk</code> 使用 <code>Vector3Int chunkKey</code> 标记所在分桶</li>
+<li>每个 <code>TileEntry</code> 使用 <code>Vector3Int gridPosition</code> 标记单个tile在模板内的逻辑坐标</li>
+<li>运行时和编辑时会从分桶数据重建 <code>Vector3Int -&gt; TileEntry</code> 查询表</li>
+<li>普通单格查询应通过 <code>Vector3Int</code> 直接查询，不应遍历整个模板的所有tile</li>
+</ul>
+<p>这样做的原因是Unity默认不稳定支持直接序列化 <code>Dictionary</code>，因此保存层使用可序列化的chunk列表，而使用层恢复为类似C++ <code>map</code> / 哈希表的查询结构。</p>
+<p>模板实体层级也应按chunk组织。当前约定是将tile实体放入模板对象下的 <code>Tile_Chunks/Chunk_x_y_z</code> 节点中，避免一个模板根节点下直接堆满所有tile实体。</p>
+<h3 id="_8">编辑器约定</h3>
 <p>建筑模板应提供专用Editor编辑器，用于在Scene视图或Inspector中编辑模板内容。</p>
 <p>编辑器需要支持：</p>
 <ul>
@@ -2284,7 +2346,7 @@
 <li>以Object空间原点作为左下角进行可视化</li>
 </ul>
 <p>编辑器中显示的网格应遵循“1个tile = 1个Unity世界单位”的默认比例。</p>
-<h3 id="_8">运行时优化约定</h3>
+<h3 id="_9">运行时优化约定</h3>
 <p>建筑模板在游戏运行时应自动执行一次初始化优化。初版目标是合并模板内可合并tile的mesh，以减少Draw Call和渲染对象数量。</p>
 <p>MagicaVoxel导出的obj通常共享同一套调色板材质，因此在材质一致且tile允许合并时，可以将多个tile的Mesh合并为一个或少数几个Mesh。</p>
 <p>需要注意：</p>
@@ -2293,6 +2355,34 @@
 <li>仍需要保留特殊tile的脚本参数，供后续破坏、交互或门逻辑使用</li>
 <li>初版可以先保留每个tile的BoxCollider，后续再考虑合并碰撞</li>
 <li>不应把有独立运行时行为的tile强制合并掉</li>
+</ul>
+<p>当前运行时优化采用chunk级别重建策略。tile被摧毁或恢复时，不重建整栋建筑的mesh，只标记该tile所在的mesh chunk为dirty，并在后续帧中按数量上限分帧重建。这样可以避免单个tile破坏造成整栋建筑重新合并的高开销。</p>
+<h3 id="_10">当前实现进度</h3>
+<p>目前Unity工程中已完成以下初版脚本：</p>
+<ul>
+<li><code>BuildingTile</code></li>
+<li>维护tile目标对象、六方向朝向、硬度、耐久、是否可摧毁、是否阻挡移动/寻路、是否可参与mesh合并等信息</li>
+<li>修改朝向时会同步旋转目标模型</li>
+<li>
+<p>摧毁/恢复时会切换碰撞和渲染状态，并通知模板刷新对应mesh chunk</p>
+</li>
+<li>
+<p><code>BuildingTemplate</code></p>
+</li>
+<li>记录模板长宽高，约定1个区块为 <span class="arithmatex">\(8\times 8\)</span> tile</li>
+<li>使用 <code>TileChunk -&gt; TileEntry列表</code> 保存模板内容</li>
+<li>运行时建立 <code>Vector3Int -&gt; TileEntry</code> 查询表，支持按坐标直接获取tile</li>
+<li>将tile实体整理到 <code>Tile_Chunks/Chunk_x_y_z</code> 层级中</li>
+<li>支持按坐标造成伤害或设置摧毁状态</li>
+<li>
+<p>支持按mesh chunk合并可合并tile的mesh，并在tile视觉状态变化时只重建对应chunk</p>
+</li>
+<li>
+<p><code>BuildingTemplateEditor</code></p>
+</li>
+<li>已有第一版Scene视图编辑器</li>
+<li>支持选择tile prefab、选择朝向、选择高度层、放置/删除/吸取tile</li>
+<li>当前手感仍需要继续调整，后续重点应放在连续绘制、拖拽体验、层级切换、预览表现和误操作保护</li>
 </ul>
 
 
