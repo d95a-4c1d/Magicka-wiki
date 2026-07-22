@@ -2159,6 +2159,13 @@
 <p>先做面数优化，将复杂的像素三角面压成纹理信息，先用UV简单直接填充断面</p>
 <p>如何生成比较平直的拆分？先尝试一下Voronoi Fracture + 曼哈顿距离</p>
 <p>感觉做完面合并后，关于LOD的需求就没这么紧迫了，如果有需要的话在没接入体素光追管线前，我们先尝试两种不同的LOD生成方法 Marching Cubes 和纯降低体素分辨率而不产生斜面</p>
+<h2 id="_4">现状</h2>
+<p>目前已完成 Voxel Object 烘焙管线的第一阶段。选中 <code>BuildingTemplate</code> 后，可通过 <code>Tools/Magicka/Building/Bake Selected Template/Surface Meshes</code> 生成位于 <code>Assets/Prefab/Building/Baked</code> 的 baked prefab；根节点使用 <code>BuildingTemplateBaked</code>，子对象不再保留编辑期 <code>VoxelObject</code> 脚本。</p>
+<p>烘焙器会将同一平面上的连续体素面按表面占用进行合并，颜色变化不再切分 Mesh。每个合并面只生成一个 quad，逐体素的 MagicaVoxel palette index 则写入 R8 atlas，并通过 UV0 采样。</p>
+<p>baked prefab 使用独立的 <code>Voxel Baked Atlas Lit/Transparent</code> shader。Shader 固定读取 index atlas，再查询 256x1 的颜色 palette 与材质属性纹理；编辑期预览 shader 与 baked shader 相互独立，不包含运行时分支。</p>
+<p>以 <code>Market</code> 模板为例，85 个唯一 Mesh 的顶点数由 1,433,252 降至 140,976，三角形数由 716,626 降至 70,488，几何量约减少 90.2%。Voronoi 分割、断面生成与 LOD 尚未接入。</p>
+<h3 id="_5">可能的优化</h3>
+<p>当前 atlas 会按 Voxel Object 展开后的完整表面保存索引，尚未复用地板等结构在 <code>outputSizeInVoxels</code> 中的周期循环。后续可保留一个周期 tile 并使用循环 UV，以减少大型重复表面的 atlas 尺寸与材质资产数量。</p>
 
 
 
